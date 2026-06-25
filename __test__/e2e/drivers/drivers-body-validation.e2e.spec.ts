@@ -56,7 +56,6 @@ describe('Driver API body validation check', () => {
             .post('/drivers')
             .send({
                 ...correctTestDriverData,
-                name: 'A', // too shot
             })
             .expect(HttpStatus.BadRequest);
 
@@ -152,4 +151,10 @@ describe('Driver API body validation check', () => {
             createdAt: expect.any(String),
         });
     });
+
+
+        const driverListResponse = await request(app).get('/drivers');
+        expect(driverListResponse.body).toHaveLength(0);
+    });
+
 });

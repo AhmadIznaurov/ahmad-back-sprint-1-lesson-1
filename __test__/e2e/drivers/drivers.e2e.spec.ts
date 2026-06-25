@@ -2,8 +2,13 @@ import request from 'supertest';
 import express from 'express';
 import { setupApp } from '../../../src/setup-app';
 import { DriverInputDto } from '../../../src/drivers/dto/driver.input-dto';
+
 import { HttpStatus } from '../../../src/types/http-statuses';
 import { VehicleFeature } from '../../../src/drivers/types/driver';
+
+import {HttpStatus} from "../../../src/core/types/http-statuses";
+
+
 
 describe('Driver API', () => {
     const app = express();
@@ -25,11 +30,20 @@ describe('Driver API', () => {
         await request(app).delete('/testing/all-data').expect(HttpStatus.NoContent);
     });
 
+
     it('should create driver; POST drivers', async () => {
         const newDriver: DriverInputDto = {
             ...testDriverData,
             name: 'Feodor',
             email: 'feodor@example.com',
+
+    it('should create driver; POST /drivers', async () => {
+        const newDriver: DriverInputDto = {
+            ...testDriverData,
+            name: 'Valentin',
+            phoneNumber: '123-456-7890',
+            email: 'valentin@example.com',
+
         };
 
         await request(app)
@@ -73,6 +87,7 @@ describe('Driver API', () => {
             createdAt: expect.any(String),
         });
     });
+
 
     it('should update driver; PUT /drivers/:id', async () => {
         const createResponse = await request(app)
@@ -125,4 +140,6 @@ describe('Driver API', () => {
         );
         expect(driverResponse.status).toBe(HttpStatus.NotFound);
     });
+
+
 });
