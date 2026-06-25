@@ -1,0 +1,11 @@
+import express, { Express, Request, Response } from 'express';
+
+export const setupApp = (app: Express) => {
+    app.use(express.json()); // middleware для парсинга JSON в теле запроса. (парсит JSON)
+
+    app.get('/', (req: Request, res: Response) => {
+        res.status(200).send('Hello world!');
+    });
+
+    return app;
+};
