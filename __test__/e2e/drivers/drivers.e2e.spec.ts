@@ -2,7 +2,12 @@ import request from 'supertest';
 import express from 'express';
 import { setupApp } from '../../../src/setup-app';
 import { DriverInputDto } from '../../../src/drivers/dto/driver.input-dto';
+
+import { HttpStatus } from '../../../src/types/http-statuses';
+import { VehicleFeature } from '../../../src/drivers/types/driver';
+
 import {HttpStatus} from "../../../src/core/types/http-statuses";
+
 
 
 describe('Driver API', () => {
@@ -25,12 +30,20 @@ describe('Driver API', () => {
         await request(app).delete('/testing/all-data').expect(HttpStatus.NoContent);
     });
 
+
+    it('should create driver; POST drivers', async () => {
+        const newDriver: DriverInputDto = {
+            ...testDriverData,
+            name: 'Feodor',
+            email: 'feodor@example.com',
+
     it('should create driver; POST /drivers', async () => {
         const newDriver: DriverInputDto = {
             ...testDriverData,
             name: 'Valentin',
             phoneNumber: '123-456-7890',
             email: 'valentin@example.com',
+
         };
 
         await request(app)
@@ -74,4 +87,59 @@ describe('Driver API', () => {
             createdAt: expect.any(String),
         });
     });
+
+
+    it('should update driver; PUT /drivers/:id', async () => {
+        const createResponse = await request(app)
+            .post('/drivers')
+            .send({ ...testDriverData, name: 'Another Driver' })
+            .expect(HttpStatus.Created);
+
+        const driverUpdateData: DriverInputDto = {
+            name: 'Updated Name',
+            phoneNumber: '999-888-7777',
+            email: 'updated@example.com',
+            vehicleMake: 'Tesla',
+            vehicleModel: 'Model S',
+            vehicleYear: 2022,
+            vehicleLicensePlate: 'NEW-789',
+            vehicleDescription: 'Updated vehicle description',
+            vehicleFeatures: [VehicleFeature.ChildSeat],
+        };
+
+        await request(app)
+            .put(`/drivers/${createResponse.body.id}`)
+            .send(driverUpdateData)
+            .expect(HttpStatus.NoContent);
+
+        const driverResponse = await request(app).get(
+            `/drivers/${createResponse.body.id}`,
+        );
+
+        expect(driverResponse.body).toEqual({
+            ...driverUpdateData,
+            id: createResponse.body.id,
+            createdAt: expect.any(String),
+        });
+    });
+
+    it('DELETE /drivers/:id and check after NOT FOUND', async () => {
+        const {
+            body: { id: createdDriverId },
+        } = await request(app)
+            .post('/drivers')
+            .send({ ...testDriverData, name: 'Another Driver' })
+            .expect(HttpStatus.Created);
+
+        await request(app)
+            .delete(`/drivers/${createdDriverId}`)
+            .expect(HttpStatus.NoContent);
+
+        const driverResponse = await request(app).get(
+            `/drivers/${createdDriverId}`,
+        );
+        expect(driverResponse.status).toBe(HttpStatus.NotFound);
+    });
+
+
 });
